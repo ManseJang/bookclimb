@@ -1,4 +1,4 @@
-# 북클라이밍 - 독서의 정상에 도전하라  – 2025-05-08 (rev.AUG-28-G)
+# 북클라이밍 - 독서의 정상에 도전하라  – 2025-05-08 (rev.AUG-28-H)  // Force Light Mode
 import streamlit as st, requests, re, json, base64, time, mimetypes, uuid, datetime, random, os
 from bs4 import BeautifulSoup
 from openai import OpenAI
@@ -10,29 +10,42 @@ NAVER_CLIENT_SECRET = st.secrets["NAVER_CLIENT_SECRET"]
 NAVER_OCR_SECRET    = st.secrets.get("NAVER_OCR_SECRET","")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-# ───── 공통 테마 & 유틸 ─────
+# ───── 공통 테마 & 유틸 (항상 화이트 모드) ─────
 THEME_CSS = """
 <style>
+/* ✅ 강제 라이트 모드 */
+html { color-scheme: light !important; }
 :root{
-  --bg:#f7f8fb; --card:#ffffff; --text:#0b1220; --muted:#4b5563; --ring:#e5e7eb;
-  --btn-bg:#fef08a; --btn-text:#0b1220; --btn-bg-hover:#fde047; --chip:#eef2ff; --chip-text:#1f2937;
+  /* Light palette 고정 */
+  --bg:#ffffff;        /* 전체 배경 */
+  --card:#ffffff;      /* 카드/컨테이너 */
+  --text:#0b1220;      /* 본문 텍스트 */
+  --muted:#4b5563;     /* 보조 텍스트 */
+  --ring:#e5e7eb;      /* 테두리 */
+  --btn-bg:#fef08a;    /* 버튼 배경 */
+  --btn-text:#0b1220;  /* 버튼 텍스트 */
+  --btn-bg-hover:#fde047;
+  --chip:#eef2ff;
+  --chip-text:#1f2937;
 }
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#0b1020; --card:#111827; --text:#f3f4f6; --muted:#cbd5e1; --ring:#334155;
-    --btn-bg:#a7f3d0; --btn-text:#0b1220; --btn-bg-hover:#86efac; --chip:#1f2937; --chip-text:#e5e7eb;
-  }
-}
+
 html, body { background: var(--bg) !important; }
-section.main > div.block-container{ background: var(--card); border-radius: 14px; padding: 18px 22px; }
+section.main > div.block-container{
+  background: var(--card);
+  border-radius: 14px;
+  padding: 18px 22px;
+  box-shadow: 0 2px 16px rgba(0,0,0,.04);
+}
 h1,h2,h3,h4,h5{ color:var(--text) !important; font-weight:800 }
 p, label, span, div{ color:var(--text) }
 .stMarkdown small, .badge{ color:var(--muted) }
 
 /* 입력창 대비 */
 input, textarea, .stTextInput input, .stTextArea textarea{
-  color:var(--text) !important; background: rgba(127,127,127,.08) !important; 
-  border:1px solid var(--ring) !important; border-radius:10px !important;
+  color:var(--text) !important;
+  background: #f5f7fb !important;
+  border:1px solid var(--ring) !important;
+  border-radius:10px !important;
 }
 
 /* 사이드바 카드 라디오 */
@@ -47,7 +60,7 @@ input, textarea, .stTextInput input, .stTextArea textarea{
   background: var(--btn-bg) !important; color: var(--btn-text) !important; 
   border:1px solid rgba(0,0,0,.08) !important; border-radius:12px !important;
   padding:10px 16px !important; font-weight:800 !important;
-  box-shadow: 0 6px 16px rgba(0,0,0,.12) !important; transition: all .15s ease;
+  box-shadow: 0 6px 16px rgba(0,0,0,.08) !important; transition: all .15s ease;
 }
 .stButton>button:hover{ background: var(--btn-bg-hover) !important; transform: translateY(-1px) }
 
@@ -173,7 +186,7 @@ def level_params(level:str):
     if level=="심화": return dict(temp=0.5, explain_len=1700, debate_rounds=6, language="정확하고 논리적인 말", penalties=True)
     return dict(temp=0.35, explain_len=1300, debate_rounds=6, language="친절한 말", penalties=False)
 
-# ───── Intro 이미지 도우미(현재보다 70%로 축소 표시) ─────
+# ───── Intro 이미지 (강제 70% 축소) ─────
 def load_intro_path():
     for name in ["asset/intro.png","asset/intro.jpg","asset/intro.jpeg","asset/intro.webp"]:
         if os.path.exists(name): return name
@@ -219,7 +232,7 @@ def page_book():
     intro_path = load_intro_path()
     if intro_path:
         l, c, r = st.columns([0.15,0.70,0.15])  # 중앙 70% 컬럼
-        with c: render_img_percent(intro_path, 0.70)  # 그 안에서 다시 70%
+        with c: render_img_percent(intro_path, 0.70)  # 그 안에서 70%
 
     st.header("📘 1) 책검색 및 표지대화")
 
@@ -522,7 +535,7 @@ def page_feedback():
 # ───── MAIN ─────
 def main():
     st.set_page_config("북클라이밍","📚",layout="wide")
-    st.markdown(THEME_CSS, unsafe_allow_html=True)
+    st.markdown(THEME_CSS, unsafe_allow_html=True)  # ✅ 항상 라이트 모드 CSS 적용
     st.title("북클라이밍: 독서의 정상에 도전하라")
 
     if "current_page" not in st.session_state: st.session_state.current_page="책 검색"
