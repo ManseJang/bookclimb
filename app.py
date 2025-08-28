@@ -1,4 +1,4 @@
-# 북클라이밍 - 독서의 정상에 도전하라  – 2025-05-08 (rev.AUG-28-H)  // Force Light Mode
+# 북클라이밍 - 독서의 정상에 도전하라 – 2025-05-08 (rev.AUG-28-I)  // Force Light + Sidebar Gray
 import streamlit as st, requests, re, json, base64, time, mimetypes, uuid, datetime, random, os
 from bs4 import BeautifulSoup
 from openai import OpenAI
@@ -10,20 +10,21 @@ NAVER_CLIENT_SECRET = st.secrets["NAVER_CLIENT_SECRET"]
 NAVER_OCR_SECRET    = st.secrets.get("NAVER_OCR_SECRET","")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-# ───── 공통 테마 & 유틸 (항상 화이트 모드) ─────
+# ───── 공통 테마 & 유틸 (항상 라이트 모드) ─────
 THEME_CSS = """
 <style>
 /* ✅ 강제 라이트 모드 */
 html { color-scheme: light !important; }
 :root{
   /* Light palette 고정 */
-  --bg:#ffffff;        /* 전체 배경 */
-  --card:#ffffff;      /* 카드/컨테이너 */
-  --text:#0b1220;      /* 본문 텍스트 */
-  --muted:#4b5563;     /* 보조 텍스트 */
-  --ring:#e5e7eb;      /* 테두리 */
-  --btn-bg:#fef08a;    /* 버튼 배경 */
-  --btn-text:#0b1220;  /* 버튼 텍스트 */
+  --bg:#ffffff;           /* 본문 배경 */
+  --sidebar-bg:#f6f7fb;   /* ⬅ 사이드바 은은한 회색 */
+  --card:#ffffff;         /* 카드/컨테이너 */
+  --text:#0b1220;         /* 본문 텍스트 */
+  --muted:#4b5563;        /* 보조 텍스트 */
+  --ring:#e5e7eb;         /* 테두리 */
+  --btn-bg:#fef08a;       /* 버튼 배경 */
+  --btn-text:#0b1220;     /* 버튼 텍스트 */
   --btn-bg-hover:#fde047;
   --chip:#eef2ff;
   --chip-text:#1f2937;
@@ -40,19 +41,30 @@ h1,h2,h3,h4,h5{ color:var(--text) !important; font-weight:800 }
 p, label, span, div{ color:var(--text) }
 .stMarkdown small, .badge{ color:var(--muted) }
 
+/* ⬅ 사이드바 스타일: 은은한 회색 + 우측 경계선 */
+div[data-testid="stSidebar"]{
+  background: var(--sidebar-bg) !important;
+  border-right: 1px solid var(--ring) !important;
+  box-shadow: inset -1px 0 0 rgba(0,0,0,0.02);
+}
+div[data-testid="stSidebar"] .sidebar-content{ padding-right: 8px; }
+
+/* 사이드바 카드 라디오 */
+.sidebar-radio [data-baseweb="radio"] > div{
+  border:1px solid var(--ring);
+  border-radius:12px;
+  padding:8px 12px;
+  margin:6px 0;
+  background:var(--chip);
+  color:var(--chip-text);
+}
+
 /* 입력창 대비 */
 input, textarea, .stTextInput input, .stTextArea textarea{
   color:var(--text) !important;
   background: #f5f7fb !important;
   border:1px solid var(--ring) !important;
   border-radius:10px !important;
-}
-
-/* 사이드바 카드 라디오 */
-.stSidebar{ background: var(--bg) !important; }
-.sidebar-radio [data-baseweb="radio"] > div{
-  border:1px solid var(--ring); border-radius:12px; padding:8px 12px; margin:6px 0;
-  background:var(--chip); color:var(--chip-text);
 }
 
 /* 버튼 */
@@ -223,7 +235,7 @@ def recommend_topics(title, syn, level, tries=2):
         if len(cand)==3: return cand
     return ["미래를 위해 미리 준비해야 한다.","힘든 친구를 도와줘야 한다.","자연을 아껴야 한다."]
 
-# ───── PAGE 1 : 책검색 & 표지대화 ─────
+# ───── PAGE 1 : 책검색 & 표지탐색 ─────
 def page_book():
     st.markdown('<span class="badge">난이도를 선택하세요 (모든 활동에 적용)</span>', unsafe_allow_html=True)
     level = st.selectbox("난이도", ["쉬움","기본","심화"], index=["쉬움","기본","심화"].index(st.session_state.get("level","기본")))
@@ -234,7 +246,7 @@ def page_book():
         l, c, r = st.columns([0.15,0.70,0.15])  # 중앙 70% 컬럼
         with c: render_img_percent(intro_path, 0.70)  # 그 안에서 70%
 
-    st.header("📘 1) 책검색 및 표지대화")
+    st.header("📘 1) 책검색 및 표지탐색")
 
     if st.sidebar.button("페이지 초기화"): st.session_state.clear(); st.rerun()
 
@@ -529,13 +541,13 @@ def page_feedback():
         st.subheader("피드백 결과"); st.write(fb)
 
     st.markdown("---")
-    try: st.link_button("🌐 독서감상문 공유", "http://wwww.example.com")
-    except Exception: st.markdown('<a class="linklike-btn" href="http://wwww.example.com" target="_blank">🌐 독서감상문 공유</a>', unsafe_allow_html=True)
+    try: st.link_button("🌐 독서감상문 공유", "https://padlet.com/jangseman12/padlet-hgydovnuoecbyhi0")
+    except Exception: st.markdown('<a class="linklike-btn" href="https://padlet.com/jangseman12/padlet-hgydovnuoecbyhi0" target="_blank">🌐 독서감상문 공유</a>', unsafe_allow_html=True)
 
 # ───── MAIN ─────
 def main():
     st.set_page_config("북클라이밍","📚",layout="wide")
-    st.markdown(THEME_CSS, unsafe_allow_html=True)  # ✅ 항상 라이트 모드 CSS 적용
+    st.markdown(THEME_CSS, unsafe_allow_html=True)  # ✅ 항상 라이트 모드 CSS + 사이드바 회색 적용
     st.title("북클라이밍: 독서의 정상에 도전하라")
 
     if "current_page" not in st.session_state: st.session_state.current_page="책 검색"
@@ -544,7 +556,7 @@ def main():
     with st.sidebar:
         st.markdown("### 메뉴")
         menu_labels = {
-            "책 검색":"📘 1) 책검색 및 표지대화",
+            "책 검색":"📘 1) 책검색 및 표지탐색",
             "단어 알아보기":"🧩 2) 단어 알아보기",
             "독서 퀴즈":"📝 3) 독서 퀴즈",
             "독서 토론":"⚖️ 4) 독서 토론",
